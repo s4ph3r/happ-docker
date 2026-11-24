@@ -1,0 +1,30 @@
+# Docker Compose для Happ Desktop + Selkies
+#
+# Порты:
+#   443  — HTTPS веб-морда (Nginx → Selkies, самоподписанный сертификат)
+#   10809 — SOCKS5 proxy (Happ/xray-core)
+#   10808 — HTTP proxy (Happ/xray-core)
+#
+# Тома:
+#   ./happ-config:/root/.config/happ  — настройки Happ
+#   ./happ-data:/root/.local/share/happ — данные Happ
+
+services:
+  happ:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: happ-desktop:v4
+    container_name: happ-desktop
+    ports:
+      - "443:443"      # HTTPS веб-морда (Nginx → Selkies)
+      - "10809:10809"  # SOCKS5 proxy
+      - "10808:10808"  # HTTP proxy
+    volumes:
+      - ./happ-config:/root/.config/happ
+      - ./happ-data:/root/.local/share/happ
+    environment:
+      - DISPLAY=:99
+      - SELKIES_PORT=8080
+      - SELKIES_MODE=websockets
+    restart: unless-stopped
